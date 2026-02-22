@@ -5,8 +5,6 @@ VisualStudioVersion = 17.14.36623.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vibrant", "vibrant.csproj", "{A91F8629-FF86-4A09-A046-F405424A430E}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "VibrantInstaller", "..\VibrantInstaller\VibrantInstaller.vdproj", "{9C874E81-5891-60B6-3889-1EA9EDAA57B4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\work\demucs\dist\demucs_cli.exe = ..\..\..\work\demucs\dist\demucs_cli.exe
@@ -30,14 +28,6 @@ Global
 		{A91F8629-FF86-4A09-A046-F405424A430E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A91F8629-FF86-4A09-A046-F405424A430E}.Release|x64.ActiveCfg = Release|x64
 		{A91F8629-FF86-4A09-A046-F405424A430E}.Release|x64.Build.0 = Release|x64
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Debug|Any CPU.ActiveCfg = Debug
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Debug|Any CPU.Build.0 = Debug
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Debug|x64.ActiveCfg = Debug
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Debug|x64.Build.0 = Debug
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Release|Any CPU.ActiveCfg = Release
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Release|Any CPU.Build.0 = Release
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Release|x64.ActiveCfg = Release
-		{9C874E81-5891-60B6-3889-1EA9EDAA57B4}.Release|x64.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

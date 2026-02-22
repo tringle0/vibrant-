@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NAudio.Wave;
 using vibrant.Controls;
 using vibrant.Converter;
 using vibrant.Models;
@@ -11,6 +13,8 @@ namespace vibrant {
     public partial class MainForm : Form {
 
         public static MainForm instance;
+        private WaveOutEvent audioOut;
+        private AudioFileReader audioReader;
         public MainForm() {
             instance = this;
             InitializeComponent();
@@ -113,11 +117,84 @@ namespace vibrant {
         }
 
         private async Task PlayVibrAsync() {
-            await VibrPlayer.StreamVibrFileAsync(
-                path: @"C:\Users\User\Documents\roland_john\Vibrant\vibrFiles\GHOUL_Camellia.vibr",
+            Song selected = SongSelector.GetSelectedSong();
+            if (selected == null) {
+                MessageBox.Show("No song selected.", "Playback Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string port = comPortTextBox.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(port))
+                port = "COM3";
+
+            string mp3Path = FindSongMp3(selected);
+            if (!string.IsNullOrWhiteSpace(mp3Path) && File.Exists(mp3Path)) {
+                StartAudioPlayback(mp3Path);
+            }
+
+            await Task.Run(() => VibrPlayer.StreamVibrFileAsync(
+                path: selected.filePath,
                 sampleRate: 3000,
-                serialPort: "COM6"
-            );
+                serialPort: port
+            ));
+        }
+
+        private void StartAudioPlayback(string path) {
+            StopAudioPlayback();
+            audioReader = new AudioFileReader(path);
+            audioOut = new WaveOutEvent();
+            audioOut.Init(audioReader);
+            audioOut.Play();
+        }
+
+        private void StopAudioPlayback() {
+            try {
+                if (audioOut != null) {
+                    audioOut.Stop();
+                    audioOut.Dispose();
+                    audioOut = null;
+                }
+            }
+            catch { }
+
+            try {
+                if (audioReader != null) {
+                    audioReader.Dispose();
+                    audioReader = null;
+                }
+            }
+            catch { }
+        }
+
+        private string FindSongMp3(Song song) {
+            if (song == null)
+                return null;
+
+            string baseName = Path.GetFileNameWithoutExtension(song.filePath);
+            string root = Path.Combine(DirectoryConfig.tempFilesLocation, "htdemucs");
+            string direct = Path.Combine(root, baseName, "song.mp3");
+            if (File.Exists(direct))
+                return direct;
+
+            if (!Directory.Exists(root))
+                return null;
+
+            string bestMatch = null;
+            DateTime bestTime = DateTime.MinValue;
+
+            foreach (string path in Directory.EnumerateFiles(root, "song.mp3", SearchOption.AllDirectories)) {
+                string dirName = Path.GetFileName(Path.GetDirectoryName(path));
+                if (string.Equals(dirName, baseName, StringComparison.OrdinalIgnoreCase))
+                    return path;
+
+                DateTime t = File.GetLastWriteTime(path);
+                if (t > bestTime) {
+                    bestTime = t;
+                    bestMatch = path;
+                }
+            }
+
+            return bestMatch;
         }
     }
 }

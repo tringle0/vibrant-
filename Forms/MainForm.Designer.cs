@@ -25,6 +25,8 @@
         private void InitializeComponent() {
             this.songList = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.comPortTextBox = new System.Windows.Forms.TextBox();
+            this.comPortLabel = new System.Windows.Forms.Label();
             this.currentSongCover = new System.Windows.Forms.PictureBox();
             this.button3 = new System.Windows.Forms.Button();
             this.currentSongArtist = new System.Windows.Forms.Label();
@@ -51,6 +53,8 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.White;
+            this.panel1.Controls.Add(this.comPortTextBox);
+            this.panel1.Controls.Add(this.comPortLabel);
             this.panel1.Controls.Add(this.currentSongCover);
             this.panel1.Controls.Add(this.button3);
             this.panel1.Controls.Add(this.currentSongArtist);
@@ -60,6 +64,26 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(358, 374);
             this.panel1.TabIndex = 1;
+            // 
+            // comPortTextBox
+            // 
+            this.comPortTextBox.Location = new System.Drawing.Point(83, 300);
+            this.comPortTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.comPortTextBox.Name = "comPortTextBox";
+            this.comPortTextBox.Size = new System.Drawing.Size(192, 20);
+            this.comPortTextBox.TabIndex = 4;
+            this.comPortTextBox.Text = "COM3";
+            // 
+            // comPortLabel
+            // 
+            this.comPortLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.comPortLabel.Location = new System.Drawing.Point(83, 282);
+            this.comPortLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.comPortLabel.Name = "comPortLabel";
+            this.comPortLabel.Size = new System.Drawing.Size(192, 16);
+            this.comPortLabel.TabIndex = 3;
+            this.comPortLabel.Text = "COM port";
+            this.comPortLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // currentSongCover
             // 
@@ -76,7 +100,7 @@
             // button3
             // 
             this.button3.Font = new System.Drawing.Font("Ticketing", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(135, 310);
+            this.button3.Location = new System.Drawing.Point(135, 330);
             this.button3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(89, 36);
@@ -90,7 +114,7 @@
             this.currentSongArtist.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.currentSongArtist.Font = new System.Drawing.Font("Ticketing", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.currentSongArtist.ForeColor = System.Drawing.Color.Blue;
-            this.currentSongArtist.Location = new System.Drawing.Point(83, 278);
+            this.currentSongArtist.Location = new System.Drawing.Point(83, 262);
             this.currentSongArtist.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.currentSongArtist.Name = "currentSongArtist";
             this.currentSongArtist.Size = new System.Drawing.Size(192, 19);
@@ -174,6 +198,8 @@
         private System.Windows.Forms.PictureBox currentSongCover;
         private System.Windows.Forms.Label currentSongTitle;
         private System.Windows.Forms.Label currentSongArtist;
+        private System.Windows.Forms.TextBox comPortTextBox;
+        private System.Windows.Forms.Label comPortLabel;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using vibrant.Models;
 
 namespace vibrant.Converter {
@@ -19,8 +20,9 @@ namespace vibrant.Converter {
         const int FreqMax = 99;
 
 
-        //replace with location of ffmpeg
-        static readonly string ffmpegPath = @"C:\Users\User\Downloads\ffmpeg-2025-12-31-git-38e89fe502-full_build\ffmpeg-2025-12-31-git-38e89fe502-full_build\bin\ffmpeg.exe";
+        // Local ThirdParty tools shipped with the project
+        static readonly string ffmpegPath = GetToolPath("ffmpeg.exe");
+        static readonly string demucsPath = GetToolPath("demucs_cli.exe");
 
         // =========================
         // DEMUCS SPLIT
@@ -29,16 +31,42 @@ namespace vibrant.Converter {
             await Task.Run(() =>
             {
                 Process process = new Process();
-                //replace with location of demucs
-                process.StartInfo.FileName =
-                    @"C:\Users\User\work\demucs\dist\demucs_cli.exe";
+                // Local ThirdParty tools shipped with the project
+                process.StartInfo.FileName = demucsPath;
                 process.StartInfo.Arguments =
                     "\"" + filePath + "\" -o " +
                     DirectoryConfig.tempFilesLocation +
                     " -n htdemucs";
                 process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.CreateNoWindow = true;
+
+                process.OutputDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Data))
+                        Debug.WriteLine("[demucs] " + e.Data);
+                };
+                process.ErrorDataReceived += (s, e) =>
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Data))
+                        Debug.WriteLine("[demucs-err] " + e.Data);
+                };
                 process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
                 process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    MessageBox.Show(
+                        "demucs failed (exit " + process.ExitCode + ").\n" +
+                        "Check Output window (Debug) for details.",
+                        "Audio Import Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return;
+                }
 
                 string modelDir = Path.Combine(
                     DirectoryConfig.tempFilesLocation,
@@ -60,14 +88,17 @@ namespace vibrant.Converter {
                     .Where(f =>
                         f.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
                         f.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(f => StemOrderKey(Path.GetFileNameWithoutExtension(f)))
                     .ToList();
 
                 if (stems.Count == 0)
                     return;
 
+                EnsureSongMp3(origPath: filePath, songDir: songDir);
+
                 ConstructVibr(stems, filePath);
 
-                Directory.Delete(songDir, true);
+                // Directory.Delete(songDir, true); // keep stems for inspection/debugging
             });
         }
 
@@ -321,6 +352,79 @@ namespace vibrant.Converter {
             if (v < min) return min;
             if (v > max) return max;
             return v;
+        }
+
+        private static int StemOrderKey(string stemName) {
+            string name = stemName.ToLowerInvariant();
+            if (name.Contains("drums")) return 0;
+            if (name.Contains("bass")) return 1;
+            if (name.Contains("vocals")) return 2;
+            if (name.Contains("other")) return 3;
+            return 99;
+        }
+
+        private static void EnsureSongMp3(string origPath, string songDir) {
+            try {
+                if (string.IsNullOrWhiteSpace(songDir))
+                    return;
+
+                string destPath = Path.Combine(songDir, "song.mp3");
+                if (File.Exists(destPath))
+                    return;
+
+                string ext = Path.GetExtension(origPath);
+                if (string.Equals(ext, ".mp3", StringComparison.OrdinalIgnoreCase)) {
+                    File.Copy(origPath, destPath, true);
+                    return;
+                }
+
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = ffmpegPath;
+                psi.Arguments =
+                    "-y -i \"" + origPath + "\" -vn -acodec libmp3lame -q:a 2 \"" + destPath + "\"";
+                psi.UseShellExecute = false;
+                psi.CreateNoWindow = true;
+                psi.RedirectStandardOutput = true;
+                psi.RedirectStandardError = true;
+
+                using (Process p = Process.Start(psi)) {
+                    p.WaitForExit();
+                    if (p.ExitCode != 0) {
+                        Debug.WriteLine("ffmpeg failed to create song.mp3 (exit " + p.ExitCode + ")");
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Debug.WriteLine("EnsureSongMp3 error: " + ex.Message);
+            }
+        }
+
+        private static string GetToolPath(string exeName) {
+            // Try to resolve relative to the running app first, then walk up a few levels.
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string candidate = Path.GetFullPath(Path.Combine(baseDir, "ThirdParty", "exes", exeName));
+            if (File.Exists(candidate))
+                return candidate;
+
+            candidate = Path.GetFullPath(Path.Combine(baseDir, "ThirdParty", "ThirdParty", exeName));
+            if (File.Exists(candidate))
+                return candidate;
+
+            DirectoryInfo dir = new DirectoryInfo(baseDir);
+            for (int i = 0; i < 6 && dir != null; i++) {
+                candidate = Path.GetFullPath(Path.Combine(dir.FullName, "ThirdParty", "exes", exeName));
+                if (File.Exists(candidate))
+                    return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(dir.FullName, "ThirdParty", "ThirdParty", exeName));
+                if (File.Exists(candidate))
+                    return candidate;
+                dir = dir.Parent;
+            }
+
+            throw new FileNotFoundException(
+                "Required tool not found: " + exeName +
+                ". Expected under ThirdParty\\exes (or ThirdParty\\ThirdParty) relative to the project or output folder.");
         }
     }
 }
