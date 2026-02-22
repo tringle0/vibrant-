@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace vibrant.Models {
@@ -12,6 +13,16 @@ namespace vibrant.Models {
 
         // Optional WinForms logger hook
         public static Action<string> Log;
+
+        // Cancellation support
+        private static CancellationTokenSource _cts;
+
+        public static void Stop() {
+            if (_cts != null && !_cts.IsCancellationRequested) {
+                _cts.Cancel();
+                LogMsg("Stop requested.");
+            }
+        }
 
         private static void LogMsg(string msg) {
             Debug.WriteLine(msg);
@@ -124,6 +135,11 @@ namespace vibrant.Models {
                 return;
             }
 
+            // Create a fresh CancellationTokenSource for this playback session
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
+            CancellationToken ct = _cts.Token;
+
             double delaySeconds = (double)HOP_SIZE / sampleRate;
             double frameMs = delaySeconds * 1000.0;
 
@@ -162,6 +178,11 @@ namespace vibrant.Models {
 
                     var sw = Stopwatch.StartNew();
                     while ((line = reader.ReadLine()) != null) {
+                        if (ct.IsCancellationRequested) {
+                            LogMsg("Playback stopped.");
+                            break;
+                        }
+
                         if (string.IsNullOrWhiteSpace(line))
                             continue;
 
@@ -186,7 +207,13 @@ namespace vibrant.Models {
                         double targetMs = frameIndex * frameMs;
                         double remainingMs = targetMs - sw.Elapsed.TotalMilliseconds;
                         if (remainingMs > 0) {
-                            await Task.Delay((int)Math.Round(remainingMs)).ConfigureAwait(false);
+                            try {
+                                await Task.Delay((int)Math.Round(remainingMs), ct).ConfigureAwait(false);
+                            }
+                            catch (TaskCanceledException) {
+                                LogMsg("Playback stopped.");
+                                break;
+                            }
                         }
                     }
 

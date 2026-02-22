@@ -196,5 +196,9 @@ namespace vibrant {
 
             return bestMatch;
         }
+
+        private void button1_Click(object sender, EventArgs e) {
+            VibrPlayer.Stop();
+        }
     }
 }
