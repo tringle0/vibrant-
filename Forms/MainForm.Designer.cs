@@ -26,9 +26,12 @@
             this.songList = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.comPortTextBox = new System.Windows.Forms.TextBox();
+            this.vibDelayTextBox = new System.Windows.Forms.TextBox();
             this.comPortLabel = new System.Windows.Forms.Label();
+            this.vibDelayLabel = new System.Windows.Forms.Label();
             this.currentSongCover = new System.Windows.Forms.PictureBox();
             this.button3 = new System.Windows.Forms.Button();
+            this.buttonStop = new System.Windows.Forms.Button();
             this.currentSongArtist = new System.Windows.Forms.Label();
             this.currentSongTitle = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -54,9 +57,12 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.White;
             this.panel1.Controls.Add(this.comPortTextBox);
+            this.panel1.Controls.Add(this.vibDelayTextBox);
             this.panel1.Controls.Add(this.comPortLabel);
+            this.panel1.Controls.Add(this.vibDelayLabel);
             this.panel1.Controls.Add(this.currentSongCover);
             this.panel1.Controls.Add(this.button3);
+            this.panel1.Controls.Add(this.buttonStop);
             this.panel1.Controls.Add(this.currentSongArtist);
             this.panel1.Controls.Add(this.currentSongTitle);
             this.panel1.Location = new System.Drawing.Point(304, 11);
@@ -70,9 +76,18 @@
             this.comPortTextBox.Location = new System.Drawing.Point(83, 300);
             this.comPortTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.comPortTextBox.Name = "comPortTextBox";
-            this.comPortTextBox.Size = new System.Drawing.Size(192, 20);
+            this.comPortTextBox.Size = new System.Drawing.Size(150, 20);
             this.comPortTextBox.TabIndex = 4;
-            this.comPortTextBox.Text = "COM3";
+            this.comPortTextBox.Text = "BLE";
+            // 
+            // vibDelayTextBox
+            // 
+            this.vibDelayTextBox.Location = new System.Drawing.Point(246, 300);
+            this.vibDelayTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.vibDelayTextBox.Name = "vibDelayTextBox";
+            this.vibDelayTextBox.Size = new System.Drawing.Size(60, 20);
+            this.vibDelayTextBox.TabIndex = 6;
+            this.vibDelayTextBox.Text = "180";
             // 
             // comPortLabel
             // 
@@ -80,10 +95,21 @@
             this.comPortLabel.Location = new System.Drawing.Point(83, 282);
             this.comPortLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.comPortLabel.Name = "comPortLabel";
-            this.comPortLabel.Size = new System.Drawing.Size(192, 16);
+            this.comPortLabel.Size = new System.Drawing.Size(150, 16);
             this.comPortLabel.TabIndex = 3;
             this.comPortLabel.Text = "COM port";
             this.comPortLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // vibDelayLabel
+            // 
+            this.vibDelayLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.vibDelayLabel.Location = new System.Drawing.Point(246, 282);
+            this.vibDelayLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.vibDelayLabel.Name = "vibDelayLabel";
+            this.vibDelayLabel.Size = new System.Drawing.Size(60, 16);
+            this.vibDelayLabel.TabIndex = 5;
+            this.vibDelayLabel.Text = "VIB ms";
+            this.vibDelayLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // currentSongCover
             // 
@@ -108,6 +134,19 @@
             this.button3.Text = "play";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // buttonStop
+            // 
+            this.buttonStop.Font = new System.Drawing.Font("Ticketing", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonStop.Location = new System.Drawing.Point(230, 330);
+            this.buttonStop.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.buttonStop.Name = "buttonStop";
+            this.buttonStop.Size = new System.Drawing.Size(89, 36);
+            this.buttonStop.TabIndex = 7;
+            this.buttonStop.Text = "stop";
+            this.buttonStop.UseVisualStyleBackColor = true;
+            this.buttonStop.Enabled = false;
+            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
             // currentSongArtist
             // 
@@ -200,9 +239,12 @@
         private System.Windows.Forms.Label currentSongArtist;
         private System.Windows.Forms.TextBox comPortTextBox;
         private System.Windows.Forms.Label comPortLabel;
+        private System.Windows.Forms.TextBox vibDelayTextBox;
+        private System.Windows.Forms.Label vibDelayLabel;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.Button button6;
     }
 }

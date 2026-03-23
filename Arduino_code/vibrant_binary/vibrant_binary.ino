@@ -1,5 +1,7 @@
 #include <Wire.h>
 #include "Adafruit_DRV2605.h"
+#include <math.h>
+
 
 
 // --- CONFIG ---
@@ -81,6 +83,17 @@ void setup() {
   Serial.println(" bytes.");
 }
 
+
+float mapLog(float freq, float fMin, float fMax, float pMin, float pMax) {
+  // Clamp
+  if (freq < fMin) freq = fMin;
+  if (freq > fMax) freq = fMax;
+
+  float t = log10f(freq / fMin) / log10f(fMax / fMin);
+  return pMin + t * (pMax - pMin);
+}
+
+
 // --- FRAME PARSE ---
 void parseFrame(const uint8_t* buf) {
   for (uint8_t i = 0; i < NUM_CHANNELS; i++) {
@@ -99,7 +112,8 @@ void parseFrame(const uint8_t* buf) {
     }
 
     // Map 0..100 -> 1..10 pulses
-    float targetPulsesF = 1.0f + (freq / 100.0f) * 9.0f;
+    //float targetPulsesF = 1.0f + (freq / 100.0f) * 9.0f;
+    float targetPulsesF = mapLog(freq, 1.0f, 1000.0f, 1.0f, 10.0f);
     uint8_t targetPulses = (uint8_t)round(targetPulsesF);
     if (targetPulses < 1) targetPulses = 1;
     if (targetPulses > 10) targetPulses = 10;
@@ -107,21 +121,26 @@ void parseFrame(const uint8_t* buf) {
     pulsesPerSample[i] = targetPulses;
 
     float pulseTimeF = (float)SAMPLE_PERIOD / (float)pulsesPerSample[i];
-    unsigned long half = (unsigned long)(pulseTimeF / 2.0f);
-    if (half < MIN_PULSE_US) half = MIN_PULSE_US;
+    unsigned long on_half = (unsigned long)(pulseTimeF / 10.0f * 9);
+    unsigned long off_half = (unsigned long)(pulseTimeF / 10.0f );
+  
+    if (on_half < MIN_PULSE_US) on_half = MIN_PULSE_US;
+    if (off_half < MIN_PULSE_US) off_half = MIN_PULSE_US;
 
     // Ensure we fit into SAMPLE_PERIOD
-    unsigned long maxPulsesAllowed = SAMPLE_PERIOD / (2 * half);
+    unsigned long maxPulsesAllowed = SAMPLE_PERIOD / (on_half+off_half);
     if (maxPulsesAllowed == 0) maxPulsesAllowed = 1;
     if (pulsesPerSample[i] > maxPulsesAllowed) pulsesPerSample[i] = (uint8_t)maxPulsesAllowed;
 
     // Recompute half using final pulse count
     pulseTimeF = (float)SAMPLE_PERIOD / (float)pulsesPerSample[i];
-    half = (unsigned long)(pulseTimeF / 2.0f);
-    if (half < MIN_PULSE_US) half = MIN_PULSE_US;
+    on_half = (unsigned long)(pulseTimeF / 10.0f * 9);
+    off_half = (unsigned long)(pulseTimeF / 10.0f);
+    if (on_half < MIN_PULSE_US) on_half = MIN_PULSE_US;
+    if (off_half < MIN_PULSE_US) off_half = MIN_PULSE_US;
 
-    onTime[i] = half;
-    offTime[i] = half;
+    onTime[i] = on_half;
+    offTime[i] = off_half;
 
     vibrating[i] = false;
     lastToggleTime[i] = micros();
